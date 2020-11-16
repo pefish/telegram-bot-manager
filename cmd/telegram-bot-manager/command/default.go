@@ -173,7 +173,7 @@ function execute(command, args) {
 			telegramSender.SendMsg(telegram_sender.MsgStruct{
 				ChatId: result.Message.Chat.Id,
 				Msg:    []byte(executeResult),
-			})
+			}, 0)
 		}
 		timer.Reset(time.Second)
 	}
