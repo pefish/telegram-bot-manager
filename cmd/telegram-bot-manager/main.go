@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/pefish/go-commander"
-	"github.com/pefish/telegram-bot-manager/pkg/command"
+	"github.com/pefish/telegram-bot-manager/cmd/telegram-bot-manager/command"
 	"github.com/pefish/telegram-bot-manager/version"
 	"log"
 )

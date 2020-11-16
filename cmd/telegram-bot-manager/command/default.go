@@ -7,6 +7,7 @@ import (
 	go_decimal "github.com/pefish/go-decimal"
 	"github.com/pefish/go-http"
 	go_logger "github.com/pefish/go-logger"
+	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
 	vm2 "github.com/pefish/telegram-bot-manager/pkg/vm"
 	"github.com/pefish/telegram-bot-manager/version"
 	"io/ioutil"
@@ -127,6 +128,10 @@ function execute(command, args) {
 			} `json:"message"`
 		} `json:"result"`
 	}
+
+	telegramSender := telegram_sender.NewTelegramSender(token)
+	telegramSender.SetLogger(go_logger.Logger)
+
 	for range timer.C {
 		var getUpdatesResult GetUpdatesResult
 		_, err := go_http.NewHttpRequester(go_http.WithLogger(go_logger.Logger)).GetForStruct(go_http.RequestParam{
@@ -165,18 +170,10 @@ function execute(command, args) {
 			// ack
 			go_logger.Logger.InfoF("---- process command: %s", commandText)
 			go_logger.Logger.InfoF("---- update_id: %d", result.UpdateId)
-			var sendMessageResult struct{
-				Ok bool `json:"ok"`
-				ErrorCode uint64 `json:"error_code"`
-				Description string `json:"description"`
-			}
-			_, err := go_http.NewHttpRequester(go_http.WithLogger(go_logger.Logger)).GetForStruct(go_http.RequestParam{
-				Url:       fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", token, result.Message.Chat.Id, executeResult),
-			}, &sendMessageResult)
-			if err != nil {
-				go_logger.Logger.Error(err)
-				continue
-			}
+			telegramSender.SendMsg(telegram_sender.MsgStruct{
+				ChatId: result.Message.Chat.Id,
+				Msg:    []byte(executeResult),
+			})
 		}
 		timer.Reset(time.Second)
 	}

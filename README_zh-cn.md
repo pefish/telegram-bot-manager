@@ -1,15 +1,42 @@
-# XXX
+# telegram-bot-manager
 
-[![view examples](https://img.shields.io/badge/learn%20by-examples-0C8EC5.svg?style=for-the-badge&logo=go)](https://github.com/pefish/XXX)
+[![view examples](https://img.shields.io/badge/learn%20by-examples-0C8EC5.svg?style=for-the-badge&logo=go)](https://github.com/pefish/telegram-bot-manager)
 
 Read this in other languages: [English](README.md), [简体中文](README_zh-cn.md)
 
-XXX
+telegram-bot-manager is a robot manager for telegram.
+
+## 安装
+
+```
+go get github.com/pefish/telegram-bot-manager/cmd/telegram-bot-manager
+```
 
 ## 快速开始
 
-```go
+```shell
+telegram-bot-manager --config="/path/to/sample.yaml"
+```
 
+Robot manager will reply all updates automatically according to the rules in `/path/to/sample.js`.
+
+**/path/to/config.yaml**
+```
+token: "***"
+commandsJsFile: "/path/to/sample.js"
+```
+
+**/path/to/sample.js**
+```js
+var commands = {
+    "/test": function (args) {
+        // console.log(args)
+        return "test: " + JSON.stringify(args)
+    },
+    "/haha": function (args) {
+        return "xixi"
+    }
+}
 ```
 
 ## 文档

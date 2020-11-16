@@ -10,5 +10,7 @@ require (
 	github.com/pefish/go-config v0.2.1
 	github.com/pefish/go-decimal v0.2.2
 	github.com/pefish/go-http v0.4.13
+	github.com/pefish/go-interface-logger v0.0.8
 	github.com/pefish/go-logger v0.4.5
+	github.com/pkg/errors v0.9.1
 )
