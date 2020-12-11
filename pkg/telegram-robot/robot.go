@@ -6,7 +6,7 @@ import (
 	go_decimal "github.com/pefish/go-decimal"
 	go_error "github.com/pefish/go-error"
 	go_http "github.com/pefish/go-http"
-	go_logger "github.com/pefish/go-logger"
+	go_interface_logger "github.com/pefish/go-interface-logger"
 	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
 	vm2 "github.com/pefish/telegram-bot-manager/pkg/vm"
 	"io/ioutil"
@@ -22,6 +22,7 @@ type Robot struct {
 	token string
 	offsetFileFs *os.File
 	telegramSender *telegram_sender.TelegramSender
+	logger      go_interface_logger.InterfaceLogger
 }
 
 func (r *Robot) TelegramSender() *telegram_sender.TelegramSender {
@@ -47,10 +48,17 @@ var commands = {
 }
 */
 func NewRobot(commandsStr, token string) *Robot {
+	telegramSender := telegram_sender.NewTelegramSender(token)
 	return &Robot{
 		commandsStr: commandsStr,
 		token: token,
+		telegramSender: telegramSender,
 	}
+}
+
+func (r *Robot) SetLogger(logger go_interface_logger.InterfaceLogger) {
+	r.logger = logger
+	r.telegramSender.SetLogger(logger)
 }
 
 func (r *Robot) Close() error {
@@ -130,7 +138,7 @@ function execute(command, args) {
 		offsetStr = string(offsetBytes)
 	}
 
-	go_logger.Logger.InfoF("current offset: %s", offsetStr)
+	r.logger.InfoF("current offset: %s", offsetStr)
 	type GetUpdatesResult struct {
 		Ok     bool `json:"ok"`
 		Result []struct {
@@ -160,37 +168,34 @@ function execute(command, args) {
 		} `json:"result"`
 	}
 
-	r.telegramSender = telegram_sender.NewTelegramSender(r.token)
-	r.telegramSender.SetLogger(go_logger.Logger)
-
 	for range timer.C {
 		var getUpdatesResult GetUpdatesResult
-		_, err := go_http.NewHttpRequester(go_http.WithLogger(go_logger.Logger)).GetForStruct(go_http.RequestParam{
+		_, err := go_http.NewHttpRequester(go_http.WithLogger(r.logger)).GetForStruct(go_http.RequestParam{
 			Url: fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%s&limit=10", r.token, offsetStr),
 		}, &getUpdatesResult)
 		if err != nil {
-			go_logger.Logger.Error(go_error.WithStack(err))
+			r.logger.Error(go_error.WithStack(err))
 			timer.Reset(2 * time.Second)
 			continue
 		}
-		go_logger.Logger.Debug(getUpdatesResult)
+		r.logger.Debug(getUpdatesResult)
 		if !getUpdatesResult.Ok {
-			go_logger.Logger.Error(errors.New("getUpdatesResult.Ok not true"))
+			r.logger.Error(errors.New("getUpdatesResult.Ok not true"))
 			timer.Reset(2 * time.Second)
 			continue
 		}
 		if len(getUpdatesResult.Result) == 0 {
-			go_logger.Logger.Info("no updates")
+			r.logger.Info("no updates")
 			timer.Reset(2 * time.Second)
 			continue
 		}
-		go_logger.Logger.InfoF("-- start to process %d updates", len(getUpdatesResult.Result))
+		r.logger.InfoF("-- start to process %d updates", len(getUpdatesResult.Result))
 		for _, result := range getUpdatesResult.Result {
 			// change offset
 			offsetStr = go_decimal.Decimal.Start(result.UpdateId).AddForString(1)
 			_, err = r.offsetFileFs.WriteAt([]byte(offsetStr), 0)
 			if err != nil {
-				go_logger.Logger.Error(go_error.WithStack(err))
+				r.logger.Error(go_error.WithStack(err))
 				continue
 			}
 			// decode command
@@ -199,8 +204,8 @@ function execute(command, args) {
 			// execute command
 			executeResult := fn(commandTextArr[0], commandTextArr[1:])
 			// ack
-			go_logger.Logger.InfoF("---- process command: %s", commandText)
-			go_logger.Logger.InfoF("---- update_id: %d", result.UpdateId)
+			r.logger.InfoF("---- process command: %s", commandText)
+			r.logger.InfoF("---- update_id: %d", result.UpdateId)
 			r.telegramSender.SendMsg(telegram_sender.MsgStruct{
 				ChatId: result.Message.Chat.Id,
 				Msg:    []byte(url.QueryEscape(executeResult)),
