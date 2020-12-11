@@ -3,6 +3,7 @@ package telegram_sender
 import (
 	"encoding/json"
 	"fmt"
+	go_error "github.com/pefish/go-error"
 	go_http "github.com/pefish/go-http"
 	"github.com/pefish/go-interface-logger"
 	go_logger "github.com/pefish/go-logger"
@@ -43,7 +44,7 @@ func NewTelegramSender(token string) *TelegramSender {
 				go func(msg MsgStruct) {
 					err := ts.send(msg.ChatId, string(msg.Msg))
 					if err != nil {
-						ts.logger.Error(err)
+						ts.logger.Error(go_error.WithStack(err))
 						return
 					}
 				}(msg)
@@ -70,7 +71,7 @@ func (ts *TelegramSender) SetLogger(logger go_interface_logger.InterfaceLogger) 
 func (ts *TelegramSender) SendMsg(msg MsgStruct, interval time.Duration) error {
 	mar, err := json.Marshal(msg)
 	if err != nil {
-		return err
+		return go_error.WithStack(err)
 	}
 	if lastTime, ok := ts.lastSend[string(mar)]; ok && time.Now().Sub(lastTime) < interval {
 		return errors.New("trigger interval")
@@ -100,7 +101,7 @@ func (ts *TelegramSender) send(chatId int64, text string) error {
 		Url: fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", ts.token, chatId, text),
 	}, &sendMessageResult)
 	if err != nil {
-		return err
+		return go_error.WithStack(err)
 	}
 	if !sendMessageResult.Ok {
 		return errors.New(sendMessageResult.Description)

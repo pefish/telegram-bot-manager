@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/pefish/go-commander"
+	go_logger "github.com/pefish/go-logger"
 	"github.com/pefish/telegram-bot-manager/cmd/telegram-bot-manager/command"
 	"github.com/pefish/telegram-bot-manager/version"
-	"log"
 )
 
 func main() {
@@ -12,6 +12,6 @@ func main() {
 	commanderInstance.RegisterDefaultSubcommand(command.NewDefaultCommand())
 	err := commanderInstance.Run()
 	if err != nil {
-		log.Fatal(err)
+		go_logger.Logger.Error(err)
 	}
 }

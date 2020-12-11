@@ -29,13 +29,19 @@ commandsJsFile: "/path/to/sample.js"
 **/path/to/sample.js**
 ```js
 var commands = {
-    "/test": function (args) {
-        // console.log(args)
-        return "test: " + JSON.stringify(args)
+    "/test": {
+        desc: "测试命令",
+        func: function (args) {
+            // console.log(args)
+            return "test: " + JSON.stringify(args)
+        }
     },
-    "/haha": function (args) {
-        return "xixi"
-    }
+    "/haha": {
+        desc: "有点意思",
+        func: function (args) {
+            return "xixi"
+        }
+    },
 }
 ```
 
