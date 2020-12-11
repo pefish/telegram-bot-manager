@@ -21,6 +21,11 @@ type Robot struct {
 	commandsStr string
 	token string
 	offsetFileFs *os.File
+	telegramSender *telegram_sender.TelegramSender
+}
+
+func (r *Robot) TelegramSender() *telegram_sender.TelegramSender {
+	return r.telegramSender
 }
 
 /**
@@ -155,8 +160,8 @@ function execute(command, args) {
 		} `json:"result"`
 	}
 
-	telegramSender := telegram_sender.NewTelegramSender(r.token)
-	telegramSender.SetLogger(go_logger.Logger)
+	r.telegramSender = telegram_sender.NewTelegramSender(r.token)
+	r.telegramSender.SetLogger(go_logger.Logger)
 
 	for range timer.C {
 		var getUpdatesResult GetUpdatesResult
@@ -196,7 +201,7 @@ function execute(command, args) {
 			// ack
 			go_logger.Logger.InfoF("---- process command: %s", commandText)
 			go_logger.Logger.InfoF("---- update_id: %d", result.UpdateId)
-			telegramSender.SendMsg(telegram_sender.MsgStruct{
+			r.telegramSender.SendMsg(telegram_sender.MsgStruct{
 				ChatId: result.Message.Chat.Id,
 				Msg:    []byte(url.QueryEscape(executeResult)),
 			}, 0)
