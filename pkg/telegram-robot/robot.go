@@ -10,7 +10,6 @@ import (
 	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
 	vm2 "github.com/pefish/telegram-bot-manager/pkg/vm"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -208,7 +207,7 @@ function execute(command, args) {
 			r.logger.InfoF("---- update_id: %d", result.UpdateId)
 			r.telegramSender.SendMsg(telegram_sender.MsgStruct{
 				ChatId: result.Message.Chat.Id,
-				Msg:    []byte(url.QueryEscape(executeResult)),
+				Msg:    []byte(executeResult),
 			}, 0)
 		}
 		timer.Reset(time.Second)

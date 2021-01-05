@@ -8,6 +8,7 @@ import (
 	"github.com/pefish/go-interface-logger"
 	go_logger "github.com/pefish/go-logger"
 	"github.com/pkg/errors"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -42,7 +43,7 @@ func NewTelegramSender(token string) *TelegramSender {
 		for {
 			for _, msg := range ts.msgs {
 				go func(msg MsgStruct) {
-					err := ts.send(msg.ChatId, string(msg.Msg))
+					err := ts.send(msg.ChatId, url.QueryEscape(string(msg.Msg)))
 					if err != nil {
 						ts.logger.Error(go_error.WithStack(err))
 						return

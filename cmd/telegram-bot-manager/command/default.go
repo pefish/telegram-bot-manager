@@ -5,6 +5,7 @@ import (
 	"github.com/pefish/go-commander"
 	go_config "github.com/pefish/go-config"
 	go_error "github.com/pefish/go-error"
+	go_logger "github.com/pefish/go-logger"
 	telegram_robot "github.com/pefish/telegram-bot-manager/pkg/telegram-robot"
 	"io/ioutil"
 	"os"
@@ -50,6 +51,7 @@ func (s *DefaultCommand) Start(data commander.StartData) error {
 		return go_error.WithStack(err)
 	}
 	s.robot = telegram_robot.NewRobot(string(scriptBytes), token)
+	s.robot.SetLogger(go_logger.Logger)
 	err = s.robot.Start(data.DataDir)
 	if err != nil {
 		return go_error.WithStack(err)
