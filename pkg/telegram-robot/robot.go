@@ -207,7 +207,8 @@ function execute(command, args) {
 			r.logger.InfoF("---- update_id: %d", result.UpdateId)
 			r.telegramSender.SendMsg(telegram_sender.MsgStruct{
 				ChatId: result.Message.Chat.Id,
-				Msg:    []byte(executeResult),
+				Msg:    executeResult,
+				Ats: []string{result.Message.From.Username},
 			}, 0)
 		}
 		timer.Reset(time.Second)

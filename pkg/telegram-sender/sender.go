@@ -14,8 +14,9 @@ import (
 )
 
 type MsgStruct struct {
-	ChatId int64
-	Msg    []byte
+	ChatId int64 `json:"chat_id"`
+	Msg    string `json:"msg"`
+	Ats    []string `json:"ats"`
 }
 
 type TelegramSender struct {
@@ -43,7 +44,12 @@ func NewTelegramSender(token string) *TelegramSender {
 		for {
 			for _, msg := range ts.msgs {
 				go func(msg MsgStruct) {
-					err := ts.send(msg.ChatId, url.QueryEscape(string(msg.Msg)))
+					if msg.Ats != nil && len(msg.Ats) > 0 {
+						for _, at := range msg.Ats {
+							msg.Msg += " @" + at
+						}
+					}
+					err := ts.send(msg.ChatId, url.QueryEscape(msg.Msg))
 					if err != nil {
 						ts.logger.Error(go_error.WithStack(err))
 						return

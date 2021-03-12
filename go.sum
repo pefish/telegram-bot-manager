@@ -43,7 +43,6 @@ github.com/pefish/go-http v0.5.0 h1:95oCMjLOuQmInLty7M5BrrAuuk+k6eGfUiH6lfBLkZw=
 github.com/pefish/go-http v0.5.0/go.mod h1:xgQHS1KLx/tv83Agk5P43iSKKnsooYOpFCPMErwX2y4=
 github.com/pefish/go-interface-logger v0.0.8 h1:3/2aLR1c47CIGPhoTDZFhPWpo8tXLeevaBDDiuJDA4g=
 github.com/pefish/go-interface-logger v0.0.8/go.mod h1:OWmqpZPYoGn57lLAZLn8y6dFdD339YKge1+WxbzQ9bQ=
-github.com/pefish/go-logger v0.4.3 h1:4aPtcoMp06V2pUOHj+1UJYdlbALdQM5HC0IYnmpxYOI=
 github.com/pefish/go-logger v0.4.3/go.mod h1:N2S6ZFg70PyjD2piBtGCVCPH4qftR+aCCpN0ZW/arfc=
 github.com/pefish/go-logger v0.4.6 h1:6J2qJnnFMOscLCl9h2sSvxkHJ5ODolRDXO2zMcffdzY=
 github.com/pefish/go-logger v0.4.6/go.mod h1:N2S6ZFg70PyjD2piBtGCVCPH4qftR+aCCpN0ZW/arfc=
@@ -52,7 +51,6 @@ github.com/pefish/go-reflect v0.2.1 h1:RJs94iRBhGAUXKznI5042FhsSgF3ytHy/qeDLAV+x
 github.com/pefish/go-reflect v0.2.1/go.mod h1:J1PmxXVMl+IqyzuL1OndaKqZjkvfKLaZA9LpUCUB99c=
 github.com/pefish/go-test-assert v0.0.1 h1:zWV2Hnn/Rtjf+bEOlyB8qF9ThJb7gmXpRPWEqJtjzjg=
 github.com/pefish/go-test-assert v0.0.1/go.mod h1:kfcsv5ag411u06gdV4iRKU8D0zOglian/DBacnCoQdc=
-github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
