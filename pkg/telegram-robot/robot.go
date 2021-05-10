@@ -7,6 +7,7 @@ import (
 	go_error "github.com/pefish/go-error"
 	go_http "github.com/pefish/go-http"
 	go_interface_logger "github.com/pefish/go-interface-logger"
+	go_reflect "github.com/pefish/go-reflect"
 	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
 	vm2 "github.com/pefish/telegram-bot-manager/pkg/vm"
 	"io/ioutil"
@@ -206,7 +207,7 @@ function execute(command, args) {
 			r.logger.InfoF("---- process command: %s", commandText)
 			r.logger.InfoF("---- update_id: %d", result.UpdateId)
 			r.telegramSender.SendMsg(telegram_sender.MsgStruct{
-				ChatId: result.Message.Chat.Id,
+				ChatId: go_reflect.Reflect.ToString(result.Message.Chat.Id),
 				Msg:    executeResult,
 				Ats: []string{result.Message.From.Username},
 			}, 0)

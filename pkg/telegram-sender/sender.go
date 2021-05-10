@@ -14,7 +14,7 @@ import (
 )
 
 type MsgStruct struct {
-	ChatId int64 `json:"chat_id"`
+	ChatId string `json:"chat_id"`
 	Msg    string `json:"msg"`
 	Ats    []string `json:"ats"`
 }
@@ -98,14 +98,14 @@ func (ts *TelegramSender) SendMsg(msg MsgStruct, interval time.Duration) error {
 	return nil
 }
 
-func (ts *TelegramSender) send(chatId int64, text string) error {
+func (ts *TelegramSender) send(chatId string, text string) error {
 	var sendMessageResult struct {
 		Ok          bool   `json:"ok"`
 		ErrorCode   uint64 `json:"error_code"`
 		Description string `json:"description"`
 	}
 	_, err := ts.httpRequester.GetForStruct(go_http.RequestParam{
-		Url: fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", ts.token, chatId, text),
+		Url: fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s", ts.token, chatId, text),
 	}, &sendMessageResult)
 	if err != nil {
 		return go_error.WithStack(err)
