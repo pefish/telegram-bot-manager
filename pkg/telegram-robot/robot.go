@@ -84,7 +84,7 @@ func (r *Robot) Start(ctx context.Context, dataDir string, processCmdFn func(str
 		offsetStr = string(offsetBytes)
 	}
 
-	r.logger.InfoF("current offset: %s", offsetStr)
+	r.logger.DebugF("current offset: %s", offsetStr)
 	type GetUpdatesResult struct {
 		Ok     bool `json:"ok"`
 		Result []struct {
@@ -133,11 +133,11 @@ over:
 				continue
 			}
 			if len(getUpdatesResult.Result) == 0 {
-				r.logger.Info("no updates")
+				r.logger.Debug("no updates")
 				timer.Reset(r.loopInterval)
 				continue
 			}
-			r.logger.InfoF("-- start to process %d updates", len(getUpdatesResult.Result))
+			r.logger.DebugF("-- start to process %d updates", len(getUpdatesResult.Result))
 			for _, result := range getUpdatesResult.Result {
 				// change offset
 				offsetStr = go_decimal.Decimal.Start(result.UpdateId).AddForString(1)
@@ -146,11 +146,14 @@ over:
 					r.logger.Error(go_error.WithStack(err))
 					continue
 				}
+				r.logger.DebugF("---- process msg: %s", result.Message.Text)  // 是整个消息，如 /test hhh
+				r.logger.DebugF("---- update_id: %d", result.UpdateId)
 				commandTextArr := strings.Split(result.Message.Text, " ")
 				processResult := processCmdFn(commandTextArr[0], strings.Join(commandTextArr[1:], ""))
+				if processResult == "" {
+					continue
+				}
 				// ack
-				r.logger.InfoF("---- process msg: %s", result.Message.Text)  // 是整个消息，如 /test hhh
-				r.logger.InfoF("---- update_id: %d", result.UpdateId)
 				r.telegramSender.SendMsg(telegram_sender.MsgStruct{
 					ChatId: go_reflect.Reflect.ToString(result.Message.Chat.Id),
 					Msg:    processResult,
