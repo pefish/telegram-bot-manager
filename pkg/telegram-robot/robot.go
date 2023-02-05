@@ -123,18 +123,18 @@ over:
 			}, &getUpdatesResult)
 			if err != nil {
 				r.logger.Error(go_error.WithStack(err))
-				timer.Reset(2 * time.Second)
+				timer.Reset(r.loopInterval)
 				continue
 			}
 			r.logger.Debug(getUpdatesResult)
 			if !getUpdatesResult.Ok {
 				r.logger.Error(errors.New("getUpdatesResult.Ok not true"))
-				timer.Reset(2 * time.Second)
+				timer.Reset(r.loopInterval)
 				continue
 			}
 			if len(getUpdatesResult.Result) == 0 {
 				r.logger.Info("no updates")
-				timer.Reset(2 * time.Second)
+				timer.Reset(r.loopInterval)
 				continue
 			}
 			r.logger.InfoF("-- start to process %d updates", len(getUpdatesResult.Result))
