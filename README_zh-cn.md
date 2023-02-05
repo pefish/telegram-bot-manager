@@ -46,8 +46,8 @@ var commands = {
 ## Telegram 获取 chat id（代表群组）
 
 1. 将机器人添加到群组
-2. 在群里随便发送一个消息给机器人。比如 /test @tv_line_bot
-3. 浏览器访问 https://api.telegram.org/botXXX:YYYY/getUpdates （XXX:YYYY 是 token）
+2. 在群里随便发送一个消息。比如 /test abc
+3. 浏览器访问 https://api.telegram.org/botXXX:YYYY/getUpdates （XXX:YYYY 是 token），可以获取到机器人所在组中发的所有命令
 4. 从返回结果中找到 chat id
 
 ## 文档

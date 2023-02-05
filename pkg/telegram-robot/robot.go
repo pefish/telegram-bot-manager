@@ -1,6 +1,7 @@
 package telegram_robot
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	go_decimal "github.com/pefish/go-decimal"
@@ -9,7 +10,6 @@ import (
 	go_interface_logger "github.com/pefish/go-interface-logger"
 	go_reflect "github.com/pefish/go-reflect"
 	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
-	vm2 "github.com/pefish/telegram-bot-manager/pkg/vm"
 	"io/ioutil"
 	"os"
 	"path"
@@ -18,8 +18,8 @@ import (
 )
 
 type Robot struct {
-	commandsStr string
 	token string
+	loopInterval time.Duration
 	offsetFileFs *os.File
 	telegramSender *telegram_sender.TelegramSender
 	logger      go_interface_logger.InterfaceLogger
@@ -29,30 +29,12 @@ func (r *Robot) TelegramSender() *telegram_sender.TelegramSender {
 	return r.telegramSender
 }
 
-/**
-**commandsStr**
-var commands = {
-    "/test": {
-        desc: "测试命令",
-        func: function (args) {
-            // console.log(args)
-            return "test: " + JSON.stringify(args)
-        }
-    },
-    "/haha": {
-        desc: "有点意思",
-        func: function (args) {
-            return "xixi"
-        }
-    },
-}
-*/
-func NewRobot(commandsStr, token string) *Robot {
+func NewRobot(token string, loopInterval time.Duration) *Robot {
 	telegramSender := telegram_sender.NewTelegramSender(token)
 	return &Robot{
-		commandsStr: commandsStr,
 		token: token,
 		telegramSender: telegramSender,
+		loopInterval: loopInterval,
 	}
 }
 
@@ -62,58 +44,21 @@ func (r *Robot) SetLogger(logger go_interface_logger.InterfaceLogger) {
 }
 
 func (r *Robot) Close() error {
-	err := r.offsetFileFs.Sync()
-	if err != nil {
-		return err
-	}
-	err = r.offsetFileFs.Close()
-	if err != nil {
-		return err
+	if r.offsetFileFs != nil {
+		err := r.offsetFileFs.Sync()
+		if err != nil {
+			return err
+		}
+		err = r.offsetFileFs.Close()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 
-func (r *Robot) Start(dataDir string) error {
-	vm := vm2.NewVm()
-	_, err := vm.RunString(r.commandsStr + "\n" + `
-commands["/help"] = {
-    func: function (args) {
-        var result = ""
-        for (var k of Object.keys(commands)) {
-            if (k === "/help") {
-                continue
-            }
-            result += k + "  " + (commands[k].desc || "") + "\n"
-        }
-        if (result === "") {
-            return "No useful commands!!!"
-        }
-        result = "You can use commands：\n\n" + result
-        return result
-    }
-}
-
-function execute(command, args) {
-    if (!commands[command]) {
-        return "Sorry, I don't understand."
-    }
-    if (!commands[command].func) {
-        return "Internal Error!!! func param not be set, contact admin please!"
-    }
-    return commands[command].func(args)
-}
-`)
-	if err != nil {
-		return go_error.WithStack(err)
-	}
-
-	var fn func(string, []string) string
-	err = vm.ExportTo(vm.Get("execute"), &fn)
-	if err != nil {
-		return go_error.WithStack(err)
-	}
-
+func (r *Robot) Start(ctx context.Context, dataDir string, processCmdFn func(string, string) string) error {
 	timer := time.NewTimer(0)
 	// load offset
 	var offsetStr string = "0"
@@ -126,6 +71,7 @@ function execute(command, args) {
 		}
 	}
 	offsetFilename := path.Join(dataDir, "./offset")
+	r.logger.Debug(offsetFilename)
 	r.offsetFileFs, err = os.OpenFile(offsetFilename, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return go_error.WithStack(err)
@@ -167,52 +113,54 @@ function execute(command, args) {
 			} `json:"message"`
 		} `json:"result"`
 	}
-
-	for range timer.C {
-		var getUpdatesResult GetUpdatesResult
-		_, err := go_http.NewHttpRequester(go_http.WithLogger(r.logger)).GetForStruct(go_http.RequestParam{
-			Url: fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%s&limit=10", r.token, offsetStr),
-		}, &getUpdatesResult)
-		if err != nil {
-			r.logger.Error(go_error.WithStack(err))
-			timer.Reset(2 * time.Second)
-			continue
-		}
-		r.logger.Debug(getUpdatesResult)
-		if !getUpdatesResult.Ok {
-			r.logger.Error(errors.New("getUpdatesResult.Ok not true"))
-			timer.Reset(2 * time.Second)
-			continue
-		}
-		if len(getUpdatesResult.Result) == 0 {
-			r.logger.Info("no updates")
-			timer.Reset(2 * time.Second)
-			continue
-		}
-		r.logger.InfoF("-- start to process %d updates", len(getUpdatesResult.Result))
-		for _, result := range getUpdatesResult.Result {
-			// change offset
-			offsetStr = go_decimal.Decimal.Start(result.UpdateId).AddForString(1)
-			_, err = r.offsetFileFs.WriteAt([]byte(offsetStr), 0)
+over:
+	for {
+		select {
+		case <- timer.C:
+			var getUpdatesResult GetUpdatesResult
+			_, err := go_http.NewHttpRequester(go_http.WithLogger(r.logger), go_http.WithTimeout(20 * time.Second)).GetForObject(go_http.RequestParam{
+				Url: fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%s&limit=10", r.token, offsetStr),
+			}, &getUpdatesResult)
 			if err != nil {
 				r.logger.Error(go_error.WithStack(err))
+				timer.Reset(2 * time.Second)
 				continue
 			}
-			// decode command
-			commandText := result.Message.Text
-			commandTextArr := strings.Split(commandText, " ")
-			// execute command
-			executeResult := fn(commandTextArr[0], commandTextArr[1:])
-			// ack
-			r.logger.InfoF("---- process command: %s", commandText)
-			r.logger.InfoF("---- update_id: %d", result.UpdateId)
-			r.telegramSender.SendMsg(telegram_sender.MsgStruct{
-				ChatId: go_reflect.Reflect.ToString(result.Message.Chat.Id),
-				Msg:    executeResult,
-				Ats: []string{result.Message.From.Username},
-			}, 0)
+			r.logger.Debug(getUpdatesResult)
+			if !getUpdatesResult.Ok {
+				r.logger.Error(errors.New("getUpdatesResult.Ok not true"))
+				timer.Reset(2 * time.Second)
+				continue
+			}
+			if len(getUpdatesResult.Result) == 0 {
+				r.logger.Info("no updates")
+				timer.Reset(2 * time.Second)
+				continue
+			}
+			r.logger.InfoF("-- start to process %d updates", len(getUpdatesResult.Result))
+			for _, result := range getUpdatesResult.Result {
+				// change offset
+				offsetStr = go_decimal.Decimal.Start(result.UpdateId).AddForString(1)
+				_, err = r.offsetFileFs.WriteAt([]byte(offsetStr), 0)
+				if err != nil {
+					r.logger.Error(go_error.WithStack(err))
+					continue
+				}
+				commandTextArr := strings.Split(result.Message.Text, " ")
+				processResult := processCmdFn(commandTextArr[0], strings.Join(commandTextArr[1:], ""))
+				// ack
+				r.logger.InfoF("---- process msg: %s", result.Message.Text)  // 是整个消息，如 /test hhh
+				r.logger.InfoF("---- update_id: %d", result.UpdateId)
+				r.telegramSender.SendMsg(telegram_sender.MsgStruct{
+					ChatId: go_reflect.Reflect.ToString(result.Message.Chat.Id),
+					Msg:    processResult,
+					Ats:    []string{result.Message.From.Username},
+				}, 0)
+			}
+			timer.Reset(r.loopInterval)
+		case <- ctx.Done():
+			break over
 		}
-		timer.Reset(time.Second)
 	}
 	return nil
 }
