@@ -50,6 +50,7 @@ var commands = {
 3. 浏览器访问 https://api.telegram.org/botXXX:YYYY/getUpdates （XXX:YYYY 是 token），可以获取到机器人所在组中发的所有命令
 4. 从返回结果中找到 chat id
 
+
 ## 文档
 
 [doc](https://godoc.org/github.com/pefish/XXX)
