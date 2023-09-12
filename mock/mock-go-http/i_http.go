@@ -35,29 +35,46 @@ func (m *MockIHttp) EXPECT() *MockIHttpMockRecorder {
 	return m.recorder
 }
 
-// Get mocks base method.
-func (m *MockIHttp) Get(arg0 go_http.RequestParam) (*http.Response, string, error) {
+// GetForBytes mocks base method.
+func (m *MockIHttp) GetForBytes(arg0 go_http.RequestParam) (*http.Response, []byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0)
+	ret := m.ctrl.Call(m, "GetForBytes", arg0)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].([]byte)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetForBytes indicates an expected call of GetForBytes.
+func (mr *MockIHttpMockRecorder) GetForBytes(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetForBytes", reflect.TypeOf((*MockIHttp)(nil).GetForBytes), arg0)
+}
+
+// GetForString mocks base method.
+func (m *MockIHttp) GetForString(arg0 go_http.RequestParam) (*http.Response, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetForString", arg0)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// Get indicates an expected call of Get.
-func (mr *MockIHttpMockRecorder) Get(arg0 interface{}) *gomock.Call {
+// GetForString indicates an expected call of GetForString.
+func (mr *MockIHttpMockRecorder) GetForString(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIHttp)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetForString", reflect.TypeOf((*MockIHttp)(nil).GetForString), arg0)
 }
 
 // GetForStruct mocks base method.
-func (m *MockIHttp) GetForStruct(arg0 go_http.RequestParam, arg1 interface{}) (*http.Response, error) {
+func (m *MockIHttp) GetForStruct(arg0 go_http.RequestParam, arg1 interface{}) (*http.Response, []byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetForStruct", arg0, arg1)
 	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].([]byte)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetForStruct indicates an expected call of GetForStruct.
@@ -66,27 +83,43 @@ func (mr *MockIHttpMockRecorder) GetForStruct(arg0, arg1 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetForStruct", reflect.TypeOf((*MockIHttp)(nil).GetForStruct), arg0, arg1)
 }
 
-// MustGet mocks base method.
-func (m *MockIHttp) MustGet(arg0 go_http.RequestParam) (*http.Response, string) {
+// MustGetForBytes mocks base method.
+func (m *MockIHttp) MustGetForBytes(arg0 go_http.RequestParam) (*http.Response, []byte) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MustGet", arg0)
+	ret := m.ctrl.Call(m, "MustGetForBytes", arg0)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].([]byte)
+	return ret0, ret1
+}
+
+// MustGetForBytes indicates an expected call of MustGetForBytes.
+func (mr *MockIHttpMockRecorder) MustGetForBytes(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustGetForBytes", reflect.TypeOf((*MockIHttp)(nil).MustGetForBytes), arg0)
+}
+
+// MustGetForString mocks base method.
+func (m *MockIHttp) MustGetForString(arg0 go_http.RequestParam) (*http.Response, string) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MustGetForString", arg0)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(string)
 	return ret0, ret1
 }
 
-// MustGet indicates an expected call of MustGet.
-func (mr *MockIHttpMockRecorder) MustGet(arg0 interface{}) *gomock.Call {
+// MustGetForString indicates an expected call of MustGetForString.
+func (mr *MockIHttpMockRecorder) MustGetForString(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustGet", reflect.TypeOf((*MockIHttp)(nil).MustGet), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustGetForString", reflect.TypeOf((*MockIHttp)(nil).MustGetForString), arg0)
 }
 
 // MustGetForStruct mocks base method.
-func (m *MockIHttp) MustGetForStruct(arg0 go_http.RequestParam, arg1 interface{}) *http.Response {
+func (m *MockIHttp) MustGetForStruct(arg0 go_http.RequestParam, arg1 interface{}) (*http.Response, []byte) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MustGetForStruct", arg0, arg1)
 	ret0, _ := ret[0].(*http.Response)
-	return ret0
+	ret1, _ := ret[1].([]byte)
+	return ret0, ret1
 }
 
 // MustGetForStruct indicates an expected call of MustGetForStruct.
@@ -95,27 +128,43 @@ func (mr *MockIHttpMockRecorder) MustGetForStruct(arg0, arg1 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustGetForStruct", reflect.TypeOf((*MockIHttp)(nil).MustGetForStruct), arg0, arg1)
 }
 
-// MustPost mocks base method.
-func (m *MockIHttp) MustPost(arg0 go_http.RequestParam) (*http.Response, string) {
+// MustPostForBytes mocks base method.
+func (m *MockIHttp) MustPostForBytes(arg0 go_http.RequestParam) (*http.Response, []byte) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MustPost", arg0)
+	ret := m.ctrl.Call(m, "MustPostForBytes", arg0)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].([]byte)
+	return ret0, ret1
+}
+
+// MustPostForBytes indicates an expected call of MustPostForBytes.
+func (mr *MockIHttpMockRecorder) MustPostForBytes(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustPostForBytes", reflect.TypeOf((*MockIHttp)(nil).MustPostForBytes), arg0)
+}
+
+// MustPostForString mocks base method.
+func (m *MockIHttp) MustPostForString(arg0 go_http.RequestParam) (*http.Response, string) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MustPostForString", arg0)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(string)
 	return ret0, ret1
 }
 
-// MustPost indicates an expected call of MustPost.
-func (mr *MockIHttpMockRecorder) MustPost(arg0 interface{}) *gomock.Call {
+// MustPostForString indicates an expected call of MustPostForString.
+func (mr *MockIHttpMockRecorder) MustPostForString(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustPost", reflect.TypeOf((*MockIHttp)(nil).MustPost), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustPostForString", reflect.TypeOf((*MockIHttp)(nil).MustPostForString), arg0)
 }
 
 // MustPostForStruct mocks base method.
-func (m *MockIHttp) MustPostForStruct(arg0 go_http.RequestParam, arg1 interface{}) *http.Response {
+func (m *MockIHttp) MustPostForStruct(arg0 go_http.RequestParam, arg1 interface{}) (*http.Response, []byte) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MustPostForStruct", arg0, arg1)
 	ret0, _ := ret[0].(*http.Response)
-	return ret0
+	ret1, _ := ret[1].([]byte)
+	return ret0, ret1
 }
 
 // MustPostForStruct indicates an expected call of MustPostForStruct.
@@ -139,29 +188,46 @@ func (mr *MockIHttpMockRecorder) MustPostMultipart(arg0 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MustPostMultipart", reflect.TypeOf((*MockIHttp)(nil).MustPostMultipart), arg0)
 }
 
-// Post mocks base method.
-func (m *MockIHttp) Post(arg0 go_http.RequestParam) (*http.Response, string, error) {
+// PostForBytes mocks base method.
+func (m *MockIHttp) PostForBytes(arg0 go_http.RequestParam) (*http.Response, []byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Post", arg0)
+	ret := m.ctrl.Call(m, "PostForBytes", arg0)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].([]byte)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// PostForBytes indicates an expected call of PostForBytes.
+func (mr *MockIHttpMockRecorder) PostForBytes(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostForBytes", reflect.TypeOf((*MockIHttp)(nil).PostForBytes), arg0)
+}
+
+// PostForString mocks base method.
+func (m *MockIHttp) PostForString(arg0 go_http.RequestParam) (*http.Response, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PostForString", arg0)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// Post indicates an expected call of Post.
-func (mr *MockIHttpMockRecorder) Post(arg0 interface{}) *gomock.Call {
+// PostForString indicates an expected call of PostForString.
+func (mr *MockIHttpMockRecorder) PostForString(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Post", reflect.TypeOf((*MockIHttp)(nil).Post), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostForString", reflect.TypeOf((*MockIHttp)(nil).PostForString), arg0)
 }
 
 // PostForStruct mocks base method.
-func (m *MockIHttp) PostForStruct(arg0 go_http.RequestParam, arg1 interface{}) (*http.Response, error) {
+func (m *MockIHttp) PostForStruct(arg0 go_http.RequestParam, arg1 interface{}) (*http.Response, []byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PostForStruct", arg0, arg1)
 	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].([]byte)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // PostForStruct indicates an expected call of PostForStruct.
@@ -184,4 +250,20 @@ func (m *MockIHttp) PostMultipart(arg0 go_http.PostMultipartParam) (*http.Respon
 func (mr *MockIHttpMockRecorder) PostMultipart(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostMultipart", reflect.TypeOf((*MockIHttp)(nil).PostMultipart), arg0)
+}
+
+// PostMultipartForStruct mocks base method.
+func (m *MockIHttp) PostMultipartForStruct(arg0 go_http.PostMultipartParam, arg1 interface{}) (*http.Response, []byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PostMultipartForStruct", arg0, arg1)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].([]byte)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// PostMultipartForStruct indicates an expected call of PostMultipartForStruct.
+func (mr *MockIHttpMockRecorder) PostMultipartForStruct(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostMultipartForStruct", reflect.TypeOf((*MockIHttp)(nil).PostMultipartForStruct), arg0, arg1)
 }

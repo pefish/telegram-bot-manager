@@ -14,8 +14,8 @@ import (
 )
 
 type MsgStruct struct {
-	ChatId string `json:"chat_id"`
-	Msg    string `json:"msg"`
+	ChatId string   `json:"chat_id"`
+	Msg    string   `json:"msg"`
 	Ats    []string `json:"ats"`
 }
 
@@ -37,7 +37,7 @@ func NewTelegramSender(token string) *TelegramSender {
 		logger:        go_interface_logger.DefaultLogger,
 		msgReceived:   make(chan bool),
 		lastSend:      make(map[string]time.Time, 10),
-		httpRequester: go_http.NewHttpRequester(go_http.WithLogger(go_logger.Logger), go_http.WithTimeout(20 * time.Second)),
+		httpRequester: go_http.NewHttpRequester(go_http.WithLogger(go_logger.Logger), go_http.WithTimeout(20*time.Second)),
 	}
 
 	go func() {
@@ -104,7 +104,7 @@ func (ts *TelegramSender) send(chatId string, text string) error {
 		ErrorCode   uint64 `json:"error_code"`
 		Description string `json:"description"`
 	}
-	_, err := ts.httpRequester.GetForObject(go_http.RequestParam{
+	_, _, err := ts.httpRequester.GetForStruct(go_http.RequestParam{
 		Url: fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s", ts.token, chatId, text),
 	}, &sendMessageResult)
 	if err != nil {

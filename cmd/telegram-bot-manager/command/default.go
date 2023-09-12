@@ -5,9 +5,9 @@ import (
 	"github.com/pefish/go-commander"
 	go_config "github.com/pefish/go-config"
 	go_error "github.com/pefish/go-error"
+	vm3 "github.com/pefish/go-jsvm/pkg/vm"
 	go_logger "github.com/pefish/go-logger"
 	telegram_robot "github.com/pefish/telegram-bot-manager/pkg/telegram-robot"
-	vm2 "github.com/pefish/telegram-bot-manager/pkg/vm"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -36,6 +36,10 @@ func (s *DefaultCommand) OnExited(data *commander.StartData) error {
 	return nil
 }
 
+func (s *DefaultCommand) Init(data *commander.StartData) error {
+	return nil
+}
+
 func (s *DefaultCommand) Start(data *commander.StartData) error {
 	commandsJsFile, err := go_config.ConfigManagerInstance.GetString("commandsJsFile")
 	if err != nil {
@@ -55,11 +59,10 @@ func (s *DefaultCommand) Start(data *commander.StartData) error {
 	if err != nil {
 		return go_error.WithStack(err)
 	}
-	s.robot = telegram_robot.NewRobot(token, 2 * time.Second)
+	s.robot = telegram_robot.NewRobot(token, 2*time.Second)
 	s.robot.SetLogger(go_logger.Logger)
 
-	vm := vm2.NewVm()
-	_, err = vm.RunString(string(scriptBytes) + "\n" + `
+	vm, err := vm3.NewVmAndLoad(string(scriptBytes) + "\n" + `
 commands["/help"] = {
     func: function (args) {
         var result = ""
@@ -91,15 +94,15 @@ function execute(command, args) {
 		return go_error.WithStack(err)
 	}
 
-	var fn func(string, []string) string
-	err = vm.ExportTo(vm.Get("execute"), &fn)
-	if err != nil {
-		return go_error.WithStack(err)
-	}
-
-	err = s.robot.Start(data.ExitCancelCtx, data.DataDir, func(command string, data string) string {
+	err = s.robot.Start(data.ExitCancelCtx, data.DataDir, func(command string, data string) (string, error) {
 		commandTextArr := strings.Split(data, " ")
-		return fn(command, commandTextArr)
+		result, err := vm.RunFunc("execute", []interface{}{
+			command, commandTextArr,
+		})
+		if err != nil {
+			return "", err
+		}
+		return result.(string), nil
 	})
 	if err != nil {
 		return go_error.WithStack(err)

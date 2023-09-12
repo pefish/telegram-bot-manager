@@ -6,9 +6,9 @@ import (
 	"fmt"
 	go_decimal "github.com/pefish/go-decimal"
 	go_error "github.com/pefish/go-error"
+	go_format "github.com/pefish/go-format"
 	go_http "github.com/pefish/go-http"
 	go_interface_logger "github.com/pefish/go-interface-logger"
-	go_reflect "github.com/pefish/go-reflect"
 	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
 	"io/ioutil"
 	"os"
@@ -18,11 +18,11 @@ import (
 )
 
 type Robot struct {
-	token string
-	loopInterval time.Duration
-	offsetFileFs *os.File
+	token          string
+	loopInterval   time.Duration
+	offsetFileFs   *os.File
 	telegramSender *telegram_sender.TelegramSender
-	logger      go_interface_logger.InterfaceLogger
+	logger         go_interface_logger.InterfaceLogger
 }
 
 func (r *Robot) TelegramSender() *telegram_sender.TelegramSender {
@@ -32,9 +32,9 @@ func (r *Robot) TelegramSender() *telegram_sender.TelegramSender {
 func NewRobot(token string, loopInterval time.Duration) *Robot {
 	telegramSender := telegram_sender.NewTelegramSender(token)
 	return &Robot{
-		token: token,
+		token:          token,
 		telegramSender: telegramSender,
-		loopInterval: loopInterval,
+		loopInterval:   loopInterval,
 	}
 }
 
@@ -57,8 +57,7 @@ func (r *Robot) Close() error {
 	return nil
 }
 
-
-func (r *Robot) Start(ctx context.Context, dataDir string, processCmdFn func(string, string) string) error {
+func (r *Robot) Start(ctx context.Context, dataDir string, processCmdFn func(string, string) (string, error)) error {
 	timer := time.NewTimer(0)
 	// load offset
 	var offsetStr string = "0"
@@ -98,7 +97,7 @@ func (r *Robot) Start(ctx context.Context, dataDir string, processCmdFn func(str
 					Username  string `json:"username"`
 				} `json:"from"`
 				Chat struct {
-					Id        int64 `json:"id"`
+					Id        int64  `json:"id"`
 					FirstName string `json:"first_name"`
 					Username  string `json:"username"`
 					Type      string `json:"type"`
@@ -116,9 +115,12 @@ func (r *Robot) Start(ctx context.Context, dataDir string, processCmdFn func(str
 over:
 	for {
 		select {
-		case <- timer.C:
+		case <-timer.C:
 			var getUpdatesResult GetUpdatesResult
-			_, err := go_http.NewHttpRequester(go_http.WithLogger(r.logger), go_http.WithTimeout(20 * time.Second)).GetForObject(go_http.RequestParam{
+			_, _, err := go_http.NewHttpRequester(
+				go_http.WithLogger(r.logger),
+				go_http.WithTimeout(20*time.Second),
+			).GetForStruct(go_http.RequestParam{
 				Url: fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%s&limit=10", r.token, offsetStr),
 			}, &getUpdatesResult)
 			if err != nil {
@@ -146,22 +148,26 @@ over:
 					r.logger.Error(go_error.WithStack(err))
 					continue
 				}
-				r.logger.DebugF("---- process msg: %s", result.Message.Text)  // 是整个消息，如 /test hhh
+				r.logger.DebugF("---- process msg: %s", result.Message.Text) // 是整个消息，如 /test hhh
 				r.logger.DebugF("---- update_id: %d", result.UpdateId)
 				commandTextArr := strings.Split(result.Message.Text, " ")
-				processResult := processCmdFn(commandTextArr[0], strings.Join(commandTextArr[1:], ""))
+				processResult, err := processCmdFn(commandTextArr[0], strings.Join(commandTextArr[1:], ""))
+				if err != nil {
+					r.logger.Error(go_error.WithStack(err))
+					continue
+				}
 				if processResult == "" {
 					continue
 				}
 				// ack
 				r.telegramSender.SendMsg(telegram_sender.MsgStruct{
-					ChatId: go_reflect.Reflect.ToString(result.Message.Chat.Id),
+					ChatId: go_format.FormatInstance.ToString(result.Message.Chat.Id),
 					Msg:    processResult,
 					Ats:    []string{result.Message.From.Username},
 				}, 0)
 			}
 			timer.Reset(r.loopInterval)
-		case <- ctx.Done():
+		case <-ctx.Done():
 			break over
 		}
 	}

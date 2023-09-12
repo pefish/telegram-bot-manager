@@ -8,8 +8,12 @@ import (
 )
 
 func main() {
-	commanderInstance := commander.NewCommander(version.AppName, version.Version, version.AppName + " is a robot manager for telegram, enjoy this!!。author：pefish")
-	commanderInstance.RegisterDefaultSubcommand("", command.NewDefaultCommand())
+	commanderInstance := commander.NewCommander(version.AppName, version.Version, version.AppName+" is a robot manager for telegram, enjoy this!!。author：pefish")
+	commanderInstance.RegisterDefaultSubcommand(&commander.SubcommandInfo{
+		Desc:       "",
+		Args:       nil,
+		Subcommand: command.NewDefaultCommand(),
+	})
 	err := commanderInstance.Run()
 	if err != nil {
 		go_logger.Logger.Error(err)
