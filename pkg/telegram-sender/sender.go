@@ -5,7 +5,6 @@ import (
 	"fmt"
 	go_error "github.com/pefish/go-error"
 	go_http "github.com/pefish/go-http"
-	"github.com/pefish/go-interface-logger"
 	go_logger "github.com/pefish/go-logger"
 	"github.com/pkg/errors"
 	"net/url"
@@ -24,7 +23,7 @@ type TelegramSender struct {
 	msgLock     sync.Mutex
 	msgReceived chan bool
 	token       string
-	logger      go_interface_logger.InterfaceLogger
+	logger      go_logger.InterfaceLogger
 
 	lastSend      map[string]time.Time
 	httpRequester go_http.IHttp
@@ -34,7 +33,7 @@ func NewTelegramSender(token string) *TelegramSender {
 	ts := &TelegramSender{
 		msgs:          make([]MsgStruct, 0, 10),
 		token:         token,
-		logger:        go_interface_logger.DefaultLogger,
+		logger:        go_logger.DefaultLogger,
 		msgReceived:   make(chan bool),
 		lastSend:      make(map[string]time.Time, 10),
 		httpRequester: go_http.NewHttpRequester(go_http.WithLogger(go_logger.Logger), go_http.WithTimeout(20*time.Second)),
@@ -70,8 +69,9 @@ func NewTelegramSender(token string) *TelegramSender {
 	return ts
 }
 
-func (ts *TelegramSender) SetLogger(logger go_interface_logger.InterfaceLogger) {
+func (ts *TelegramSender) SetLogger(logger go_logger.InterfaceLogger) *TelegramSender {
 	ts.logger = logger
+	return ts
 }
 
 // interval: interval间隔内不发送

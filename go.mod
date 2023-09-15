@@ -10,9 +10,8 @@ require (
 	github.com/pefish/go-error v1.0.7
 	github.com/pefish/go-format v0.2.2
 	github.com/pefish/go-http v0.5.14
-	github.com/pefish/go-interface-logger v0.0.8
 	github.com/pefish/go-jsvm v0.1.1
-	github.com/pefish/go-logger v0.5.0
+	github.com/pefish/go-logger v0.5.2
 	github.com/pefish/go-test v0.0.3
 	github.com/pkg/errors v0.9.1
 )

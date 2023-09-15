@@ -8,7 +8,7 @@ import (
 	go_error "github.com/pefish/go-error"
 	go_format "github.com/pefish/go-format"
 	go_http "github.com/pefish/go-http"
-	go_interface_logger "github.com/pefish/go-interface-logger"
+	go_logger "github.com/pefish/go-logger"
 	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
 	"io/ioutil"
 	"os"
@@ -22,7 +22,7 @@ type Robot struct {
 	loopInterval   time.Duration
 	offsetFileFs   *os.File
 	telegramSender *telegram_sender.TelegramSender
-	logger         go_interface_logger.InterfaceLogger
+	logger         go_logger.InterfaceLogger
 }
 
 func (r *Robot) TelegramSender() *telegram_sender.TelegramSender {
@@ -38,7 +38,7 @@ func NewRobot(token string, loopInterval time.Duration) *Robot {
 	}
 }
 
-func (r *Robot) SetLogger(logger go_interface_logger.InterfaceLogger) {
+func (r *Robot) SetLogger(logger go_logger.InterfaceLogger) {
 	r.logger = logger
 	r.telegramSender.SetLogger(logger)
 }
