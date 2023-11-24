@@ -8,10 +8,10 @@ require (
 	github.com/pefish/go-config v0.2.5
 	github.com/pefish/go-decimal v0.3.0
 	github.com/pefish/go-error v1.0.7
-	github.com/pefish/go-format v0.2.2
-	github.com/pefish/go-http v0.5.14
+	github.com/pefish/go-format v0.2.6
+	github.com/pefish/go-http v0.6.0
 	github.com/pefish/go-jsvm v0.1.1
-	github.com/pefish/go-logger v0.5.2
+	github.com/pefish/go-logger v0.5.5
 	github.com/pefish/go-test v0.0.3
 	github.com/pkg/errors v0.9.1
 )

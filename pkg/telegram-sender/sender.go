@@ -33,7 +33,7 @@ func NewTelegramSender(token string) *TelegramSender {
 	ts := &TelegramSender{
 		msgs:          make([]MsgStruct, 0, 10),
 		token:         token,
-		logger:        go_logger.DefaultLogger,
+		logger:        go_logger.Logger,
 		msgReceived:   make(chan bool),
 		lastSend:      make(map[string]time.Time, 10),
 		httpRequester: go_http.NewHttpRequester(go_http.WithLogger(go_logger.Logger), go_http.WithTimeout(20*time.Second)),
