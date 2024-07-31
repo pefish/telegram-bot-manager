@@ -6,7 +6,7 @@ toolchain go1.21.0
 
 require (
 	github.com/golang/mock v1.6.0
-	github.com/pefish/go-commander v1.0.0
+	github.com/pefish/go-commander v1.0.1
 	github.com/pefish/go-decimal v0.4.0
 	github.com/pefish/go-error v1.0.8
 	github.com/pefish/go-format v0.3.2
