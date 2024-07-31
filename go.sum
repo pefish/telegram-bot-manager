@@ -32,6 +32,8 @@ github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyua
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/pefish/go-commander v0.9.0 h1:IrkBtN9xnN99K+ofO16BHTeVZz7Z0hSRNhAXhUPaLWU=
 github.com/pefish/go-commander v0.9.0/go.mod h1:O9DGll+D2bwwqHquaXdP02Q6XMd2vBd0ivsL1sIULLw=
+github.com/pefish/go-commander v1.0.0 h1:uu4OTFM2DDSk72KoAxNmiIfdc7xuCQ+Vh+6ZwPi3Rfk=
+github.com/pefish/go-commander v1.0.0/go.mod h1:O9DGll+D2bwwqHquaXdP02Q6XMd2vBd0ivsL1sIULLw=
 github.com/pefish/go-config v0.4.9 h1:4T/rm/FfZ6HgK55G0Ta8Ayu2/80clz0+Fkfr0buFUiQ=
 github.com/pefish/go-config v0.4.9/go.mod h1:skJnPGUap8UepvM+doPEcj56m0ChbQrqYl400qdPiw4=
 github.com/pefish/go-decimal v0.4.0 h1:RAPcIgoJmP1L4n2XnLMuWdOFv3TzP2Rn1UfbbLOk7Dk=
