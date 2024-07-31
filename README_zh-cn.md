@@ -9,7 +9,7 @@ telegram-bot-manager is a robot manager for telegram.
 ## 安装
 
 ```
-go get github.com/pefish/telegram-bot-manager/cmd/telegram-bot-manager
+go install github.com/pefish/telegram-bot-manager/cmd/telegram-bot-manager@latest
 ```
 
 ## 快速开始

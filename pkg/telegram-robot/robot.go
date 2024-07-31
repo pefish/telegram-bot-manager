@@ -4,33 +4,34 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	go_decimal "github.com/pefish/go-decimal"
-	go_error "github.com/pefish/go-error"
-	go_format "github.com/pefish/go-format"
-	go_http "github.com/pefish/go-http"
-	go_logger "github.com/pefish/go-logger"
-	telegram_sender "github.com/pefish/telegram-bot-manager/pkg/telegram-sender"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	go_decimal "github.com/pefish/go-decimal"
+	go_error "github.com/pefish/go-error"
+	go_format "github.com/pefish/go-format"
+	go_http "github.com/pefish/go-http"
+	i_logger "github.com/pefish/go-interface/i-logger"
+	tg_sender "github.com/pefish/tg-sender"
 )
 
 type Robot struct {
 	token          string
 	loopInterval   time.Duration
 	offsetFileFs   *os.File
-	telegramSender *telegram_sender.TelegramSender
-	logger         go_logger.InterfaceLogger
+	telegramSender *tg_sender.TgSender
+	logger         i_logger.ILogger
 }
 
-func (r *Robot) TelegramSender() *telegram_sender.TelegramSender {
+func (r *Robot) TelegramSender() *tg_sender.TgSender {
 	return r.telegramSender
 }
 
 func NewRobot(token string, loopInterval time.Duration) *Robot {
-	telegramSender := telegram_sender.NewTelegramSender(token)
+	telegramSender := tg_sender.NewTgSender(token)
 	return &Robot{
 		token:          token,
 		telegramSender: telegramSender,
@@ -38,7 +39,7 @@ func NewRobot(token string, loopInterval time.Duration) *Robot {
 	}
 }
 
-func (r *Robot) SetLogger(logger go_logger.InterfaceLogger) {
+func (r *Robot) SetLogger(logger i_logger.ILogger) {
 	r.logger = logger
 	r.telegramSender.SetLogger(logger)
 }
@@ -75,7 +76,7 @@ func (r *Robot) Start(ctx context.Context, dataDir string, processCmdFn func(str
 	if err != nil {
 		return go_error.WithStack(err)
 	}
-	offsetBytes, err := ioutil.ReadAll(r.offsetFileFs)
+	offsetBytes, err := io.ReadAll(r.offsetFileFs)
 	if err != nil {
 		return go_error.WithStack(err)
 	}
@@ -120,7 +121,7 @@ over:
 			_, _, err := go_http.NewHttpRequester(
 				go_http.WithLogger(r.logger),
 				go_http.WithTimeout(20*time.Second),
-			).GetForStruct(go_http.RequestParam{
+			).GetForStruct(&go_http.RequestParams{
 				Url: fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%s&limit=10", r.token, offsetStr),
 			}, &getUpdatesResult)
 			if err != nil {
@@ -142,7 +143,7 @@ over:
 			r.logger.DebugF("-- start to process %d updates", len(getUpdatesResult.Result))
 			for _, result := range getUpdatesResult.Result {
 				// change offset
-				offsetStr = go_decimal.Decimal.Start(result.UpdateId).AddForString(1)
+				offsetStr = go_decimal.Decimal.MustStart(result.UpdateId).MustAddForString(1)
 				_, err = r.offsetFileFs.WriteAt([]byte(offsetStr), 0)
 				if err != nil {
 					r.logger.Error(go_error.WithStack(err))
@@ -160,7 +161,7 @@ over:
 					continue
 				}
 				// ack
-				r.telegramSender.SendMsg(telegram_sender.MsgStruct{
+				r.telegramSender.SendMsg(&tg_sender.MsgStruct{
 					ChatId: go_format.FormatInstance.ToString(result.Message.Chat.Id),
 					Msg:    processResult,
 					Ats:    []string{result.Message.From.Username},

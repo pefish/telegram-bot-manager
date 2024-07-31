@@ -14,6 +14,11 @@ func main() {
 		Args:       nil,
 		Subcommand: command.NewDefaultCommand(),
 	})
+	commanderInstance.RegisterSubcommand("send", &commander.SubcommandInfo{
+		Desc:       "向群里发消息",
+		Args:       []string{"group_id", "msg"},
+		Subcommand: command.NewSendCommand(),
+	})
 	err := commanderInstance.Run()
 	if err != nil {
 		go_logger.Logger.Error(err)

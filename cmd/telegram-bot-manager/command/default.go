@@ -1,17 +1,17 @@
 package command
 
 import (
-	"flag"
-	"github.com/pefish/go-commander"
-	go_config "github.com/pefish/go-config"
-	go_error "github.com/pefish/go-error"
-	vm3 "github.com/pefish/go-jsvm/pkg/vm"
-	go_logger "github.com/pefish/go-logger"
-	telegram_robot "github.com/pefish/telegram-bot-manager/pkg/telegram-robot"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/pefish/go-commander"
+	go_error "github.com/pefish/go-error"
+	vm3 "github.com/pefish/go-jsvm"
+	go_logger "github.com/pefish/go-logger"
+	"github.com/pefish/telegram-bot-manager/pkg/global"
+	telegram_robot "github.com/pefish/telegram-bot-manager/pkg/telegram-robot"
 )
 
 type DefaultCommand struct {
@@ -22,11 +22,15 @@ func NewDefaultCommand() *DefaultCommand {
 	return &DefaultCommand{}
 }
 
-func (s *DefaultCommand) DecorateFlagSet(flagSet *flag.FlagSet) error {
+func (dc *DefaultCommand) Config() interface{} {
+	return &global.GlobalConfig
+}
+
+func (dc *DefaultCommand) Data() interface{} {
 	return nil
 }
 
-func (s *DefaultCommand) OnExited(data *commander.StartData) error {
+func (s *DefaultCommand) OnExited(commander *commander.Commander) error {
 	if s.robot != nil {
 		err := s.robot.Close()
 		if err != nil {
@@ -36,33 +40,25 @@ func (s *DefaultCommand) OnExited(data *commander.StartData) error {
 	return nil
 }
 
-func (s *DefaultCommand) Init(data *commander.StartData) error {
+func (s *DefaultCommand) Init(commander *commander.Commander) error {
 	return nil
 }
 
-func (s *DefaultCommand) Start(data *commander.StartData) error {
-	commandsJsFile, err := go_config.ConfigManagerInstance.GetString("commandsJsFile")
-	if err != nil {
-		return go_error.WithStack(err)
-	}
-	fs, err := os.Open(commandsJsFile)
+func (s *DefaultCommand) Start(commander *commander.Commander) error {
+	fs, err := os.Open(global.GlobalConfig.CommandsJsFile)
 	if err != nil {
 		return go_error.WithStack(err)
 	}
 	defer fs.Close()
-	scriptBytes, err := ioutil.ReadAll(fs)
+	scriptBytes, err := io.ReadAll(fs)
 	if err != nil {
 		return go_error.WithStack(err)
 	}
 
-	token, err := go_config.ConfigManagerInstance.GetString("token")
-	if err != nil {
-		return go_error.WithStack(err)
-	}
-	s.robot = telegram_robot.NewRobot(token, 2*time.Second)
+	s.robot = telegram_robot.NewRobot(global.GlobalConfig.Token, 2*time.Second)
 	s.robot.SetLogger(go_logger.Logger)
 
-	vm, err := vm3.NewVmAndLoad(string(scriptBytes) + "\n" + `
+	vm := vm3.NewVm(string(scriptBytes) + "\n" + `
 commands["/help"] = {
     func: function (args) {
         var result = ""
@@ -94,7 +90,7 @@ function execute(command, args) {
 		return go_error.WithStack(err)
 	}
 
-	err = s.robot.Start(data.ExitCancelCtx, data.DataDir, func(command string, data string) (string, error) {
+	err = s.robot.Start(commander.Ctx, commander.DataDir, func(command string, data string) (string, error) {
 		commandTextArr := strings.Split(data, " ")
 		result, err := vm.RunFunc("execute", []interface{}{
 			command, commandTextArr,
