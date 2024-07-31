@@ -10,7 +10,7 @@ import (
 func main() {
 	commanderInstance := commander.NewCommander(version.AppName, version.Version, version.AppName+" is a robot manager for telegram, enjoy this!!。author：pefish")
 	commanderInstance.RegisterDefaultSubcommand(&commander.SubcommandInfo{
-		Desc:       "",
+		Desc:       "监控机器人收到的命令，然后给予回复",
 		Args:       nil,
 		Subcommand: command.NewDefaultCommand(),
 	})
